@@ -3,6 +3,7 @@ import { auth, signOut } from "@/auth";
 
 const navItems = [
   { href: "/federation", label: "Overview" },
+  { href: "/federation/games", label: "Games" },
   { href: "/federation/roster", label: "Roster" },
 ];
 
