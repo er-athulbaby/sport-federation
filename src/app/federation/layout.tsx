@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import NotificationBell from "@/components/NotificationBell";
 
 const navItems = [
   { href: "/federation", label: "Overview" },
@@ -29,6 +30,7 @@ export default async function FederationLayout({ children }: { children: React.R
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            {session?.user.federationId && <NotificationBell federationId={session.user.federationId} />}
             <span className="text-sm text-slate-500">{session?.user.name}</span>
             <form
               action={async () => {
