@@ -41,14 +41,15 @@ export async function POST(
 
     try {
       const result = await pool.query(
-        `INSERT INTO officials (federation_id, full_name_en, full_name_ar, designation,
+        `INSERT INTO officials (federation_id, full_name_en, full_name_ar, designation, dob,
                                  contact_number, email, passport_number, passport_expiry_date,
                                  photo_url, tshirt_size, suit_size, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
          ON CONFLICT (federation_id, passport_number) DO UPDATE SET
            full_name_en = EXCLUDED.full_name_en,
            full_name_ar = EXCLUDED.full_name_ar,
            designation = EXCLUDED.designation,
+           dob = EXCLUDED.dob,
            contact_number = EXCLUDED.contact_number,
            email = EXCLUDED.email,
            passport_expiry_date = EXCLUDED.passport_expiry_date,
@@ -57,7 +58,7 @@ export async function POST(
            suit_size = EXCLUDED.suit_size,
            updated_at = now()
          RETURNING (xmax = 0) AS inserted`,
-        [federationId, fullNameEn, fullNameAr, s(row["Designation"]),
+        [federationId, fullNameEn, fullNameAr, s(row["Designation"]), s(row["Date of Birth"]),
          s(row["Contact Number"]), s(row["Email"]), passportNumber, passportExpiry,
          s(row["Photo URL"]), s(row["T-Shirt Size"]), s(row["Suit Size"]), createdBy]
       );

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, use } from "react";
 import { useSession } from "next-auth/react";
 import Phase2Panel from "@/components/Phase2Panel";
+import Phase3Panel from "@/components/Phase3Panel";
 
 type GameFederation = {
   game_federation_id: number;
@@ -151,8 +152,13 @@ export default function FederationGameDetailPage({
           onSubmitted={load}
         />
       )}
-      {activePhase === 3 && gf.phase3_enabled && isUnlocked(3) && (
-        <p className="text-sm text-slate-400">Phase 3 (Long List) UI coming next.</p>
+      {activePhase === 3 && gf.phase3_enabled && isUnlocked(3) && federationId && (
+        <Phase3Panel
+          federationId={federationId}
+          gameFederationId={gf.game_federation_id}
+          completed={Boolean(gf.phase3_completed_at)}
+          onSubmitted={load}
+        />
       )}
       {activePhase === 4 && gf.phase4_enabled && isUnlocked(4) && (
         <p className="text-sm text-slate-400">Phase 4 (Short List) UI coming next.</p>

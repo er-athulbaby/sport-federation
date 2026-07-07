@@ -12,7 +12,7 @@ export async function GET(
 
   const result = await pool.query(
     `SELECT full_name_en AS "Full Name (English)", full_name_ar AS "Full Name (Arabic)",
-            designation AS "Designation", contact_number AS "Contact Number", email AS "Email",
+            designation AS "Designation", dob AS "Date of Birth", contact_number AS "Contact Number", email AS "Email",
             passport_number AS "Passport Number", passport_expiry_date AS "Passport Expiry Date",
             photo_url AS "Photo URL", tshirt_size AS "T-Shirt Size", suit_size AS "Suit Size"
      FROM officials WHERE federation_id = $1 ORDER BY full_name_en ASC`,

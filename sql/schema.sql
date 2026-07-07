@@ -130,6 +130,7 @@ CREATE TABLE officials (
   full_name_en         VARCHAR(200) NOT NULL,
   full_name_ar         VARCHAR(200) NOT NULL,
   designation          VARCHAR(100),
+  dob                  DATE,
   contact_number       VARCHAR(30),
   email                VARCHAR(150),
   passport_number      VARCHAR(50) NOT NULL,

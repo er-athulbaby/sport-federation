@@ -3,7 +3,7 @@ import { requireFederationAccess, errorResponse } from "@/lib/api";
 import { NextResponse } from "next/server";
 
 const EDITABLE_FIELDS = [
-  "full_name_en", "full_name_ar", "designation", "contact_number", "email",
+  "full_name_en", "full_name_ar", "designation", "dob", "contact_number", "email",
   "passport_number", "passport_expiry_date", "photo_url", "tshirt_size", "suit_size",
 ];
 
@@ -33,7 +33,7 @@ export async function PATCH(
   try {
     const result = await pool.query(
       `UPDATE officials SET ${fields.join(", ")} WHERE id = $${i++} AND federation_id = $${i}
-       RETURNING id, full_name_en, full_name_ar, designation, contact_number, email,
+       RETURNING id, full_name_en, full_name_ar, designation, dob, contact_number, email,
                  passport_number, passport_expiry_date, photo_url, tshirt_size, suit_size,
                  created_by, created_at, updated_at`,
       values

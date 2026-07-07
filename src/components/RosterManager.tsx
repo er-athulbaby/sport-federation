@@ -22,6 +22,7 @@ type Official = {
   full_name_en: string;
   full_name_ar: string;
   designation: string | null;
+  dob: string | null;
   contact_number: string | null;
   email: string | null;
   passport_number: string;
@@ -38,7 +39,7 @@ const emptyAthlete = {
 };
 
 const emptyOfficial = {
-  full_name_en: "", full_name_ar: "", designation: "", contact_number: "", email: "",
+  full_name_en: "", full_name_ar: "", designation: "", dob: "", contact_number: "", email: "",
   passport_number: "", passport_expiry_date: "", photo_url: "", tshirt_size: "", suit_size: "",
 };
 
@@ -236,6 +237,9 @@ export default function RosterManager({ federationId }: { federationId: number }
             </Field>
             <Field label="Designation">
               <input value={officialForm.designation} onChange={(e) => setOfficialForm({ ...officialForm, designation: e.target.value })} placeholder="Coach, Manager…" className="input" />
+            </Field>
+            <Field label="Date of birth">
+              <input type="date" value={officialForm.dob} onChange={(e) => setOfficialForm({ ...officialForm, dob: e.target.value })} className="input" />
             </Field>
             <Field label="Contact number">
               <input value={officialForm.contact_number} onChange={(e) => setOfficialForm({ ...officialForm, contact_number: e.target.value })} className="input" />

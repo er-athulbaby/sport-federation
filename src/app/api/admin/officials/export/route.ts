@@ -9,7 +9,7 @@ export async function GET() {
   const result = await pool.query(
     `SELECT f.name AS "Federation", o.full_name_en AS "Full Name (English)",
             o.full_name_ar AS "Full Name (Arabic)", o.designation AS "Designation",
-            o.contact_number AS "Contact Number", o.email AS "Email",
+            o.dob AS "Date of Birth", o.contact_number AS "Contact Number", o.email AS "Email",
             o.passport_number AS "Passport Number", o.passport_expiry_date AS "Passport Expiry Date",
             o.tshirt_size AS "T-Shirt Size", o.suit_size AS "Suit Size"
      FROM officials o JOIN federations f ON f.id = o.federation_id
