@@ -51,6 +51,8 @@ export default function RosterManager({ federationId }: { federationId: number }
   const [athleteForm, setAthleteForm] = useState(emptyAthlete);
   const [officialForm, setOfficialForm] = useState(emptyOfficial);
   const [error, setError] = useState<string | null>(null);
+  const [importSummary, setImportSummary] = useState<{ inserted: number; updated: number; errors: string[] } | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -111,6 +113,27 @@ export default function RosterManager({ federationId }: { federationId: number }
     load();
   }
 
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    setImportSummary(null);
+
+    const body = new FormData();
+    body.append("file", file);
+    const res = await fetch(`/api/federations/${federationId}/${tab}/import`, {
+      method: "POST",
+      body,
+    });
+    setImporting(false);
+    e.target.value = "";
+
+    if (res.ok) {
+      setImportSummary(await res.json());
+      load();
+    }
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -122,13 +145,38 @@ export default function RosterManager({ federationId }: { federationId: number }
             Officials ({officials.length})
           </TabButton>
         </div>
-        <button
-          onClick={() => setShowForm((s) => !s)}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          {showForm ? "Cancel" : tab === "athletes" ? "Add athlete" : "Add official"}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/federations/${federationId}/${tab}/export`}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            Export
+          </a>
+          <label className="cursor-pointer rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+            {importing ? "Importing…" : "Import"}
+            <input type="file" accept=".xlsx" onChange={handleImport} className="hidden" disabled={importing} />
+          </label>
+          <button
+            onClick={() => setShowForm((s) => !s)}
+            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            {showForm ? "Cancel" : tab === "athletes" ? "Add athlete" : "Add official"}
+          </button>
+        </div>
       </div>
+
+      {importSummary && (
+        <div className="mb-4 rounded-md border border-slate-200 bg-white p-3 text-sm">
+          <p className="text-slate-700">
+            Import complete: {importSummary.inserted} added, {importSummary.updated} updated.
+          </p>
+          {importSummary.errors.length > 0 && (
+            <ul className="mt-1 list-disc pl-5 text-red-600">
+              {importSummary.errors.map((e, i) => <li key={i}>{e}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
 
       {showForm && tab === "athletes" && (
         <form onSubmit={submitAthlete} className="mb-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-5">
