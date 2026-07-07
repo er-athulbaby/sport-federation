@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { useSession } from "next-auth/react";
+import Phase2Panel from "@/components/Phase2Panel";
 
 type GameFederation = {
   game_federation_id: number;
@@ -142,8 +143,13 @@ export default function FederationGameDetailPage({
         </form>
       )}
 
-      {activePhase === 2 && gf.phase2_enabled && isUnlocked(2) && (
-        <p className="text-sm text-slate-400">Phase 2 (Entry by Number) UI coming next.</p>
+      {activePhase === 2 && gf.phase2_enabled && isUnlocked(2) && federationId && (
+        <Phase2Panel
+          federationId={federationId}
+          gameFederationId={gf.game_federation_id}
+          completed={Boolean(gf.phase2_completed_at)}
+          onSubmitted={load}
+        />
       )}
       {activePhase === 3 && gf.phase3_enabled && isUnlocked(3) && (
         <p className="text-sm text-slate-400">Phase 3 (Long List) UI coming next.</p>
