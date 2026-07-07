@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
+import Link from "next/link";
 
 type Sport = { id: number; name: string };
 type Assignment = { federation_sport_id: number; sport_id: number; name: string };
@@ -54,10 +55,20 @@ export default function FederationDetailPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-slate-900">{federation.name}</h1>
-      <p className="mb-6 text-sm text-slate-500">
-        {federation.username} &middot; {federation.email}
-      </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">{federation.name}</h1>
+          <p className="text-sm text-slate-500">
+            {federation.username} &middot; {federation.email}
+          </p>
+        </div>
+        <Link
+          href={`/admin/federations/${federation.id}/roster`}
+          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+        >
+          Manage roster
+        </Link>
+      </div>
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
         Assigned sports
