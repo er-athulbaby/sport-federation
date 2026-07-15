@@ -12,7 +12,10 @@ async function getBrowser(): Promise<Browser> {
   if (global._puppeteerBrowser && global._puppeteerBrowser.connected) {
     return global._puppeteerBrowser;
   }
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   global._puppeteerBrowser = browser;
   return browser;
 }
