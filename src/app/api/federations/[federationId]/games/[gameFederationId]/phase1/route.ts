@@ -2,7 +2,7 @@ import { pool } from "@/lib/db";
 import { requireFederationAccess, errorResponse } from "@/lib/api";
 import { NextResponse } from "next/server";
 
-export async function PATCH(
+export async function GET(
   request: Request,
   { params }: { params: Promise<{ federationId: string; gameFederationId: string }> }
 ) {
@@ -10,18 +10,21 @@ export async function PATCH(
   const { error } = await requireFederationAccess(federationId);
   if (error) return error;
 
-  const { is_participating, participation_note } = await request.json();
-  if (typeof is_participating !== "boolean") {
-    return errorResponse("is_participating (boolean) is required");
-  }
-
-  const result = await pool.query(
-    `UPDATE game_federations
-     SET is_participating = $1, participation_note = $2, phase1_confirmed_at = now()
-     WHERE id = $3 AND federation_id = $4
-     RETURNING id AS game_federation_id, is_participating, participation_note, phase1_confirmed_at`,
-    [is_participating, participation_note ?? null, gameFederationId, federationId]
+  const gfCheck = await pool.query(
+    `SELECT id FROM game_federations WHERE id = $1 AND federation_id = $2`,
+    [gameFederationId, federationId]
   );
-  if (result.rows.length === 0) return errorResponse("Not found", 404);
-  return NextResponse.json(result.rows[0]);
+  if (gfCheck.rows.length === 0) return errorResponse("Not found", 404);
+
+  const sports = await pool.query(
+    `SELECT gfs.id AS game_federation_sport_id, s.id AS sport_id, s.name AS sport_name,
+            gfs.participate_men, gfs.participate_women
+     FROM game_federation_sports gfs
+     JOIN sports s ON s.id = gfs.sport_id
+     WHERE gfs.game_federation_id = $1
+     ORDER BY s.name ASC`,
+    [gameFederationId]
+  );
+
+  return NextResponse.json(sports.rows);
 }

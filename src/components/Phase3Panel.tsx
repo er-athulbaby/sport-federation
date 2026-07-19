@@ -122,7 +122,7 @@ export default function Phase3Panel({
               key={s.sport_id}
               onClick={() => setActiveSport(s.sport_id)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                activeSport === s.sport_id ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700"
+                activeSport === s.sport_id ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700"
               }`}
             >
               {s.sport_name}
@@ -141,7 +141,7 @@ export default function Phase3Panel({
 
       {!completed && activeSport && (
         <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-lg border border-slate-200 bg-white p-3">
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
             <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Add athlete</p>
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
               {athletes.filter((a) => !addedAthleteIds.has(a.id)).map((a) => (
@@ -156,7 +156,7 @@ export default function Phase3Panel({
               {athletes.length === 0 && <p className="text-xs text-slate-400">No athletes in roster yet.</p>}
             </div>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3">
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
             <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Add official</p>
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
               {officials.filter((o) => !addedOfficialIds.has(o.id)).map((o) => (
@@ -174,7 +174,7 @@ export default function Phase3Panel({
         </div>
       )}
 
-      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3">
+      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3">
         <p className="mb-2 text-xs font-semibold uppercase text-slate-500">
           {currentSport?.sport_name} long list ({sportEntries.length})
         </p>
@@ -200,7 +200,7 @@ export default function Phase3Panel({
         <button
           onClick={submit}
           disabled={submitting}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "Generating document…" : "Submit Phase 3"}
         </button>

@@ -85,6 +85,8 @@ CREATE TABLE game_federation_sports (
   sport_id            INT NOT NULL REFERENCES sports(id) ON DELETE CASCADE,
   entry_policy_note   TEXT,
   age_cutoff_date     DATE,                  -- enforced: athlete.dob must be on/before this date
+  participate_men     BOOLEAN DEFAULT true,  -- Phase 1: federation confirms/declines per gender
+  participate_women   BOOLEAN DEFAULT true,
   created_at          TIMESTAMPTZ DEFAULT now(),
   UNIQUE (game_federation_id, sport_id)
 );

@@ -93,7 +93,7 @@ export default function Phase2Panel({
       )}
 
       {sports.map((sport) => (
-        <div key={sport.game_federation_sport_id} className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
+        <div key={sport.game_federation_sport_id} className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="mb-2 text-sm font-semibold text-slate-900">{sport.sport_name}</h3>
           {sport.entry_policy_note && <p className="mb-2 text-xs text-slate-500">{sport.entry_policy_note}</p>}
           {sport.age_cutoff_date && (
@@ -152,7 +152,7 @@ export default function Phase2Panel({
         <button
           onClick={submit}
           disabled={submitting}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "Generating documents…" : "Submit Phase 2"}
         </button>

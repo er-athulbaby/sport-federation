@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Game = {
   id: number;
@@ -28,6 +29,7 @@ const emptyForm = {
 };
 
 export default function GamesPage() {
+  const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -48,7 +50,7 @@ export default function GamesPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    await fetch("/api/admin/games", {
+    const res = await fetch("/api/admin/games", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -56,7 +58,15 @@ export default function GamesPage() {
     setSubmitting(false);
     setForm(emptyForm);
     setShowForm(false);
-    load();
+
+    if (res.ok) {
+      const game = await res.json();
+      // Go straight into setup — add federations, then their sports/events/quotas — instead
+      // of leaving the admin to find the new game in the list afterward.
+      router.push(`/admin/games/${game.id}`);
+    } else {
+      load();
+    }
   }
 
   const phaseLabels = [

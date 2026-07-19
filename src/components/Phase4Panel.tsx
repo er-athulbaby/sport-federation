@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import EntityLogo from "@/components/EntityLogo";
 
 type GameEvent = {
   game_event_id: number;
@@ -15,8 +16,11 @@ type LongListPerson = {
   entry_id: number;
   participant_type: "athlete" | "official";
   athlete_name: string | null;
-  official_name: string | null;
   athlete_gender: string | null;
+  athlete_photo: string | null;
+  official_name: string | null;
+  official_designation: string | null;
+  official_photo: string | null;
 };
 
 type SportGroup = {
@@ -44,7 +48,7 @@ export default function Phase4Panel({
   const [shortList, setShortList] = useState<ShortEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSport, setActiveSport] = useState<number | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Record<number, number>>({});
+  const [pendingEvent, setPendingEvent] = useState<Record<number, number>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
@@ -67,9 +71,7 @@ export default function Phase4Panel({
     load();
   }, [load]);
 
-  async function assign(entryId: number) {
-    const eventId = selectedEvent[entryId];
-    if (!eventId) return;
+  async function assign(entryId: number, eventId: number) {
     setError(null);
     const res = await fetch(`${base}/phase4/entries`, {
       method: "POST",
@@ -105,25 +107,25 @@ export default function Phase4Panel({
   if (loading) return <p className="text-slate-400">Loading…</p>;
 
   const currentSport = sports.find((s) => s.game_federation_sport_id === activeSport);
-
-  function assignmentsFor(gameEventId: number) {
-    return shortList.filter((s) => s.game_event_id === gameEventId);
-  }
+  const athletes = currentSport?.longList.filter((p) => p.participant_type === "athlete") ?? [];
+  const officials = currentSport?.longList.filter((p) => p.participant_type === "official") ?? [];
+  const confirmedCount = (people: LongListPerson[]) =>
+    people.filter((p) => shortList.some((s) => s.long_list_id === p.entry_id)).length;
 
   return (
     <div>
-      {sports.length === 0 && (
-        <p className="text-sm text-slate-400">No sports set up yet.</p>
-      )}
+      {sports.length === 0 && <p className="text-sm text-slate-400">No sports set up yet.</p>}
 
-      {sports.length > 0 && (
+      {sports.length > 1 && (
         <div className="mb-4 flex gap-2">
           {sports.map((s) => (
             <button
               key={s.game_federation_sport_id}
               onClick={() => setActiveSport(s.game_federation_sport_id)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                activeSport === s.game_federation_sport_id ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700"
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+                activeSport === s.game_federation_sport_id
+                  ? "bg-blue-600 text-white"
+                  : "border border-slate-300 bg-white text-slate-700"
               }`}
             >
               {s.sport_name}
@@ -136,106 +138,205 @@ export default function Phase4Panel({
 
       {currentSport && (
         <>
-          <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3">
-            <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Events &amp; quota</p>
-            <table className="w-full text-xs">
-              <thead className="text-left text-slate-500">
-                <tr><th className="py-1">Event</th><th className="py-1">Male filled</th><th className="py-1">Female filled</th></tr>
-              </thead>
-              <tbody>
-                {currentSport.events.map((ev) => {
-                  const filled = assignmentsFor(ev.game_event_id).length;
-                  return (
-                    <tr key={ev.game_event_id} className="border-t border-slate-100">
-                      <td className="py-1">{ev.name}</td>
-                      <td className="py-1">{ev.gender !== "female" ? `${filled} / ${ev.declared_male}` : "-"}</td>
-                      <td className="py-1">{ev.gender !== "male" ? `${filled} / ${ev.declared_female}` : "-"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <PersonSection
+            icon="👥"
+            title="Athletes"
+            description="Select athletes from your long list"
+            confirmed={confirmedCount(athletes)}
+            total={athletes.length}
+          >
+            {athletes.map((person) => (
+              <PersonCard
+                key={person.entry_id}
+                person={person}
+                events={currentSport.events}
+                shortList={shortList}
+                completed={completed}
+                pendingEvent={pendingEvent[person.entry_id]}
+                onPendingEventChange={(eventId) => setPendingEvent({ ...pendingEvent, [person.entry_id]: eventId })}
+                onAssign={(eventId) => assign(person.entry_id, eventId)}
+                onUnassign={unassign}
+              />
+            ))}
+            {athletes.length === 0 && <p className="text-sm text-slate-400">No athletes on the long list for this sport.</p>}
+          </PersonSection>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-3">
-            <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Long list &mdash; assign to event</p>
-            <ul className="flex flex-col gap-2">
-              {currentSport.longList.map((person) => {
-                const assignedEntries = shortList.filter((s) => s.long_list_id === person.entry_id);
-                return (
-                  <li key={person.entry_id} className="flex flex-col gap-1 border-b border-slate-100 pb-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span>
-                        {person.athlete_name ?? person.official_name}{" "}
-                        <span className="text-xs text-slate-400">({person.participant_type})</span>
-                      </span>
-                      {!completed && (
-                        <div className="flex items-center gap-1">
-                          <select
-                            className="input w-40"
-                            value={selectedEvent[person.entry_id] ?? ""}
-                            onChange={(e) => setSelectedEvent({ ...selectedEvent, [person.entry_id]: Number(e.target.value) })}
-                          >
-                            <option value="">Select event…</option>
-                            {currentSport.events.map((ev) => (
-                              <option key={ev.game_event_id} value={ev.game_event_id}>{ev.name}</option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => assign(person.entry_id)}
-                            className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-800"
-                          >
-                            Assign
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    {assignedEntries.length > 0 && (
-                      <ul className="flex flex-wrap gap-1">
-                        {assignedEntries.map((a) => {
-                          const ev = currentSport.events.find((e) => e.game_event_id === a.game_event_id);
-                          return (
-                            <li key={a.short_entry_id} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                              {ev?.name}
-                              {!completed && (
-                                <button onClick={() => unassign(a.short_entry_id)} className="ml-1 text-slate-400 hover:text-red-600">
-                                  ×
-                                </button>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-              {currentSport.longList.length === 0 && (
-                <li className="text-sm text-slate-400">No one on the long list for this sport.</li>
-              )}
-            </ul>
-          </div>
+          <div className="my-6 border-t border-slate-100" />
+
+          <PersonSection
+            icon="🎽"
+            title="Team Officials"
+            description="Select officials from your long list"
+            confirmed={confirmedCount(officials)}
+            total={officials.length}
+          >
+            {officials.map((person) => (
+              <PersonCard
+                key={person.entry_id}
+                person={person}
+                events={currentSport.events}
+                shortList={shortList}
+                completed={completed}
+                pendingEvent={pendingEvent[person.entry_id]}
+                onPendingEventChange={(eventId) => setPendingEvent({ ...pendingEvent, [person.entry_id]: eventId })}
+                onAssign={(eventId) => assign(person.entry_id, eventId)}
+                onUnassign={unassign}
+              />
+            ))}
+            {officials.length === 0 && <p className="text-sm text-slate-400">No officials on the long list for this sport.</p>}
+          </PersonSection>
         </>
       )}
 
-      {!completed && shortList.length > 0 && (
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
-          {submitting ? "Finalizing…" : "Finalize Phase 4 (Short List)"}
-        </button>
-      )}
-
-      {completed && <p className="mt-4 text-sm text-emerald-700">Phase 4 has been finalized — this is the official delegation.</p>}
+      <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+        {completed ? (
+          <p className="text-sm text-emerald-700">Phase 4 has been finalized — this is the official delegation.</p>
+        ) : (
+          <button
+            onClick={submit}
+            disabled={submitting || shortList.length === 0}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {submitting ? "Finalizing…" : "Submit Phase 4"}
+          </button>
+        )}
+      </div>
 
       {generatedUrl && (
-        <p className="mt-3 text-sm">
-          <a href={generatedUrl} target="_blank" className="text-slate-700 underline">
+        <p className="mt-3 text-right text-sm">
+          <a href={generatedUrl} target="_blank" className="text-blue-700 underline">
             Download Delegation Short List
           </a>
         </p>
+      )}
+    </div>
+  );
+}
+
+function PersonSection({
+  icon,
+  title,
+  description,
+  confirmed,
+  total,
+  children,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  confirmed: number;
+  total: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-lg">{icon}</div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{title}</p>
+            <p className="text-xs text-slate-500">{description}</p>
+          </div>
+        </div>
+        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+          {confirmed} of {total} confirmed
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </div>
+  );
+}
+
+function PersonCard({
+  person,
+  events,
+  shortList,
+  completed,
+  pendingEvent,
+  onPendingEventChange,
+  onAssign,
+  onUnassign,
+}: {
+  person: LongListPerson;
+  events: GameEvent[];
+  shortList: ShortEntry[];
+  completed: boolean;
+  pendingEvent: number | undefined;
+  onPendingEventChange: (eventId: number) => void;
+  onAssign: (eventId: number) => void;
+  onUnassign: (shortEntryId: number) => void;
+}) {
+  const name = person.athlete_name ?? person.official_name ?? "";
+  const photo = person.athlete_photo ?? person.official_photo;
+  const assignments = shortList.filter((s) => s.long_list_id === person.entry_id);
+  const isConfirmed = assignments.length > 0;
+
+  return (
+    <div className={`rounded-xl border p-3 ${isConfirmed ? "border-blue-200 bg-blue-50/40" : "border-slate-200 bg-white"}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={isConfirmed}
+            disabled={completed || (!isConfirmed && !pendingEvent)}
+            onChange={(e) => {
+              if (!e.target.checked && assignments.length > 0) {
+                assignments.forEach((a) => onUnassign(a.short_entry_id));
+              }
+            }}
+          />
+          <EntityLogo src={photo} name={name || "?"} size={36} />
+        </div>
+        {person.participant_type === "athlete" && person.athlete_gender && (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
+            {person.athlete_gender === "male" ? "M" : "F"}
+          </span>
+        )}
+      </div>
+
+      <p className="mt-2 text-sm font-medium text-slate-900">{name}</p>
+      {person.participant_type === "official" && (
+        <p className="text-xs text-slate-500">{person.official_designation ?? "Official"}</p>
+      )}
+
+      {isConfirmed ? (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {assignments.map((a) => {
+            const ev = events.find((e) => e.game_event_id === a.game_event_id);
+            return (
+              <span key={a.short_entry_id} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                {ev?.name ?? "Event"}
+                {!completed && (
+                  <button onClick={() => onUnassign(a.short_entry_id)} className="ml-1 text-blue-400 hover:text-red-600">
+                    ×
+                  </button>
+                )}
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        !completed && (
+          <div className="mt-2 flex gap-1">
+            <select
+              value={pendingEvent ?? ""}
+              onChange={(e) => onPendingEventChange(Number(e.target.value))}
+              className="input flex-1 text-xs"
+            >
+              <option value="">Select event…</option>
+              {events.map((ev) => (
+                <option key={ev.game_event_id} value={ev.game_event_id}>{ev.name}</option>
+              ))}
+            </select>
+            <button
+              disabled={!pendingEvent}
+              onClick={() => pendingEvent && onAssign(pendingEvent)}
+              className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+            >
+              Add
+            </button>
+          </div>
+        )
       )}
     </div>
   );

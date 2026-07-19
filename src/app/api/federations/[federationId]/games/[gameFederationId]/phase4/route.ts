@@ -37,8 +37,8 @@ export async function GET(
 
   const longList = await pool.query(
     `SELECT dll.id AS entry_id, dll.sport_id, dll.participant_type, dll.athlete_id, dll.official_id,
-            a.full_name_en AS athlete_name, a.gender AS athlete_gender,
-            o.full_name_en AS official_name
+            a.full_name_en AS athlete_name, a.gender AS athlete_gender, a.photo_url AS athlete_photo,
+            o.full_name_en AS official_name, o.designation AS official_designation, o.photo_url AS official_photo
      FROM delegation_long_list dll
      LEFT JOIN athletes a ON a.id = dll.athlete_id
      LEFT JOIN officials o ON o.id = dll.official_id

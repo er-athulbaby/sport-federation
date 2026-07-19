@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import Phase1Panel from "@/components/Phase1Panel";
 import Phase2Panel from "@/components/Phase2Panel";
 import Phase3Panel from "@/components/Phase3Panel";
 import Phase4Panel from "@/components/Phase4Panel";
@@ -15,7 +17,6 @@ type GameFederation = {
   phase3_enabled: boolean;
   phase4_enabled: boolean;
   is_participating: boolean | null;
-  participation_note: string | null;
   phase1_confirmed_at: string | null;
   phase2_completed_at: string | null;
   phase3_completed_at: string | null;
@@ -23,6 +24,13 @@ type GameFederation = {
 };
 
 type PhaseKey = 1 | 2 | 3 | 4;
+
+const PHASE_LABELS: Record<PhaseKey, string> = {
+  1: "Phase 1",
+  2: "Phase 2",
+  3: "Phase 3",
+  4: "Phase 4",
+};
 
 export default function FederationGameDetailPage({
   params,
@@ -34,117 +42,102 @@ export default function FederationGameDetailPage({
   const federationId = session?.user.federationId;
   const [gf, setGf] = useState<GameFederation | null>(null);
   const [activePhase, setActivePhase] = useState<PhaseKey>(1);
-  const [isParticipating, setIsParticipating] = useState(true);
-  const [note, setNote] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     if (!federationId) return;
     const res = await fetch(`/api/federations/${federationId}/games/${gameFederationId}`);
-    if (res.ok) {
-      const data = await res.json();
-      setGf(data);
-      setIsParticipating(data.is_participating ?? true);
-      setNote(data.participation_note ?? "");
-    }
+    if (res.ok) setGf(await res.json());
   }, [federationId, gameFederationId]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  async function submitPhase1(e: React.FormEvent) {
-    e.preventDefault();
-    if (!federationId) return;
-    setSubmitting(true);
-    await fetch(`/api/federations/${federationId}/games/${gameFederationId}/phase1`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_participating: isParticipating, participation_note: note }),
-    });
-    setSubmitting(false);
-    load();
-  }
-
   if (!gf) return <p className="text-slate-400">Loading…</p>;
 
-  const phases: { key: PhaseKey; label: string; enabled: boolean; done: string | null }[] = [
-    { key: 1, label: "1. Entry by Sport", enabled: gf.phase1_enabled, done: gf.phase1_confirmed_at },
-    { key: 2, label: "2. Entry by Number", enabled: gf.phase2_enabled, done: gf.phase2_completed_at },
-    { key: 3, label: "3. Long List", enabled: gf.phase3_enabled, done: gf.phase3_completed_at },
-    { key: 4, label: "4. Short List", enabled: gf.phase4_enabled, done: gf.phase4_completed_at },
+  const phases: { key: PhaseKey; enabled: boolean; done: string | null }[] = [
+    { key: 1, enabled: gf.phase1_enabled, done: gf.phase1_confirmed_at },
+    { key: 2, enabled: gf.phase2_enabled, done: gf.phase2_completed_at },
+    { key: 3, enabled: gf.phase3_enabled, done: gf.phase3_completed_at },
+    { key: 4, enabled: gf.phase4_enabled, done: gf.phase4_completed_at },
   ];
+  const enabledPhases = phases.filter((p) => p.enabled);
 
   function isUnlocked(key: PhaseKey) {
     const phase = phases.find((p) => p.key === key)!;
     if (!phase.enabled) return false;
     if (key === 1) return true;
     const prev = phases.find((p) => p.key === ((key - 1) as PhaseKey))!;
-    // If the previous phase is disabled for this game, treat as satisfied.
     return !prev.enabled || Boolean(prev.done);
   }
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-slate-900">{gf.name}</h1>
-      <p className="mb-6 text-sm text-slate-500">
-        Work through each enabled phase in order — a phase unlocks once the previous one is submitted.
-      </p>
+      <Link href="/federation/games" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+        ← Back to Dashboard
+      </Link>
 
-      <div className="mb-6 flex gap-2">
-        {phases.filter((p) => p.enabled).map((p) => {
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{gf.name}</h1>
+          <p className="mt-1 text-sm text-slate-500">Work through each enabled phase in order.</p>
+        </div>
+        <nav className="hidden items-center gap-1 text-sm sm:flex">
+          {enabledPhases.map((p, i) => (
+            <span key={p.key} className="flex items-center gap-1">
+              <button
+                onClick={() => isUnlocked(p.key) && setActivePhase(p.key)}
+                disabled={!isUnlocked(p.key)}
+                className={
+                  p.key === activePhase
+                    ? "font-semibold text-slate-900"
+                    : isUnlocked(p.key)
+                    ? "text-slate-500 hover:text-slate-900"
+                    : "cursor-not-allowed text-slate-300"
+                }
+              >
+                {PHASE_LABELS[p.key]}
+              </button>
+              {i < enabledPhases.length - 1 && <span className="text-slate-300">›</span>}
+            </span>
+          ))}
+        </nav>
+      </div>
+
+      <div className="mb-6 flex gap-2 sm:hidden">
+        {enabledPhases.map((p) => {
           const unlocked = isUnlocked(p.key);
           return (
             <button
               key={p.key}
               disabled={!unlocked}
               onClick={() => setActivePhase(p.key)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 activePhase === p.key
-                  ? "bg-slate-900 text-white"
+                  ? "bg-blue-600 text-white"
                   : unlocked
                   ? "border border-slate-300 bg-white text-slate-700"
                   : "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"
               }`}
             >
-              {p.label} {p.done && "✓"}
+              {PHASE_LABELS[p.key]} {p.done && "✓"}
             </button>
           );
         })}
-        {phases.every((p) => !p.enabled) && (
-          <p className="text-sm text-slate-400">No phases are enabled for this game.</p>
-        )}
       </div>
 
-      {activePhase === 1 && gf.phase1_enabled && (
-        <form onSubmit={submitPhase1} className="max-w-lg rounded-lg border border-slate-200 bg-white p-5">
-          <label className="mb-3 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={isParticipating}
-              onChange={(e) => setIsParticipating(e.target.checked)}
-            />
-            We will participate in this game
-          </label>
-          <label className="mb-3 flex flex-col gap-1 text-sm">
-            <span className="font-medium text-slate-700">Note (optional)</span>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} className="input" rows={3} />
-          </label>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-          >
-            {gf.phase1_confirmed_at ? "Update confirmation" : "Confirm"}
-          </button>
-          {gf.phase1_confirmed_at && (
-            <p className="mt-2 text-xs text-slate-400">
-              Last confirmed {new Date(gf.phase1_confirmed_at).toLocaleString()}
-            </p>
-          )}
-        </form>
+      {enabledPhases.length === 0 && (
+        <p className="text-sm text-slate-400">No phases are enabled for this game.</p>
       )}
 
+      {activePhase === 1 && gf.phase1_enabled && federationId && (
+        <Phase1Panel
+          federationId={federationId}
+          gameFederationId={gf.game_federation_id}
+          completed={Boolean(gf.phase1_confirmed_at)}
+          onSubmitted={load}
+        />
+      )}
       {activePhase === 2 && gf.phase2_enabled && isUnlocked(2) && federationId && (
         <Phase2Panel
           federationId={federationId}
