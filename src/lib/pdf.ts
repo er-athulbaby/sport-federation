@@ -14,6 +14,9 @@ async function getBrowser(): Promise<Browser> {
   }
   const browser = await puppeteer.launch({
     headless: true,
+    // On EC2 this points at apt-installed Google Chrome (PUPPETEER_EXECUTABLE_PATH env var);
+    // left unset, Puppeteer falls back to the Chromium it bundles itself (used for local dev).
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   global._puppeteerBrowser = browser;
