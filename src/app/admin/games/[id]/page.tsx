@@ -138,7 +138,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
 }
 
 function FederationBlock({ gf, onRemove }: { gf: GameFederation; onRemove: () => void }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [sports, setSports] = useState<GameFederationSport[]>([]);
   const [availableSports, setAvailableSports] = useState<FederationSportOption[]>([]);
   const [addSportId, setAddSportId] = useState("");
@@ -196,6 +196,9 @@ function FederationBlock({ gf, onRemove }: { gf: GameFederation; onRemove: () =>
 
       {expanded && (
         <div className="border-t border-slate-100 px-4 py-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Sports for {gf.name}
+          </p>
           <form onSubmit={addSport} className="mb-3 flex gap-2">
             <select
               value={addSportId}
@@ -242,7 +245,7 @@ function SportBlock({
   onRemove: () => void;
   onMetaChange: (patch: Partial<Pick<GameFederationSport, "entry_policy_note" | "age_cutoff_date">>) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [catalogSport, setCatalogSport] = useState<SportWithEvents | null>(null);
   const [addEventId, setAddEventId] = useState("");
@@ -336,6 +339,9 @@ function SportBlock({
             </label>
           </div>
 
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Events &amp; entry quota
+          </p>
           <form onSubmit={addEvent} className="mb-3 flex gap-2">
             <select
               value={addEventId}
@@ -351,6 +357,11 @@ function SportBlock({
               Add
             </button>
           </form>
+          {events.length === 0 && (
+            <p className="mb-2 text-xs text-slate-400">
+              Add an event above, then set its Max male / Max female quota in the table below.
+            </p>
+          )}
 
           <table className="w-full text-xs">
             <thead className="text-left text-slate-500">

@@ -93,56 +93,55 @@ export default function Phase2Panel({
       )}
 
       {sports.map((sport) => (
-        <div key={sport.game_federation_sport_id} className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
-          <h3 className="mb-2 text-sm font-semibold text-slate-900">{sport.sport_name}</h3>
-          {sport.entry_policy_note && <p className="mb-2 text-xs text-slate-500">{sport.entry_policy_note}</p>}
-          {sport.age_cutoff_date && (
-            <p className="mb-3 text-xs text-slate-500">
-              Age eligibility: born on/before {new Date(sport.age_cutoff_date).toLocaleDateString()}
-            </p>
-          )}
-          <table className="w-full text-xs">
-            <thead className="text-left text-slate-500">
-              <tr>
-                <th className="py-1">Event</th>
-                <th className="py-1">Max male</th>
-                <th className="py-1">Declared male</th>
-                <th className="py-1">Max female</th>
-                <th className="py-1">Declared female</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sport.events.map((ev) => (
-                <tr key={ev.game_event_id} className="border-t border-slate-100">
-                  <td className="py-1">{ev.name} <span className="text-slate-400">({ev.gender})</span></td>
-                  <td className="py-1">{ev.max_male}</td>
-                  <td className="py-1">
-                    <input
-                      type="number"
-                      min={0}
+        <div key={sport.game_federation_sport_id} className="mb-6">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-lg">🏆</div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{sport.sport_name}</p>
+              {sport.entry_policy_note && <p className="text-xs text-slate-500">{sport.entry_policy_note}</p>}
+              {sport.age_cutoff_date && (
+                <p className="text-xs text-slate-400">
+                  Age eligibility: born on/before {new Date(sport.age_cutoff_date).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {sport.events.map((ev) => (
+              <div key={ev.game_event_id} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-900">{ev.name}</p>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
+                    {ev.gender}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {ev.gender !== "female" && (
+                    <QuotaField
+                      label="Male"
                       max={ev.max_male}
-                      disabled={completed || ev.gender === "female"}
                       defaultValue={ev.declared_male}
-                      onBlur={(e) => updateDeclared(ev.game_event_id, "declared_male", Number(e.target.value), ev)}
-                      className="input w-16"
+                      disabled={completed}
+                      onCommit={(value) => updateDeclared(ev.game_event_id, "declared_male", value, ev)}
                     />
-                  </td>
-                  <td className="py-1">{ev.max_female}</td>
-                  <td className="py-1">
-                    <input
-                      type="number"
-                      min={0}
+                  )}
+                  {ev.gender !== "male" && (
+                    <QuotaField
+                      label="Female"
                       max={ev.max_female}
-                      disabled={completed || ev.gender === "male"}
                       defaultValue={ev.declared_female}
-                      onBlur={(e) => updateDeclared(ev.game_event_id, "declared_female", Number(e.target.value), ev)}
-                      className="input w-16"
+                      disabled={completed}
+                      onCommit={(value) => updateDeclared(ev.game_event_id, "declared_female", value, ev)}
                     />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+                </div>
+              </div>
+            ))}
+            {sport.events.length === 0 && (
+              <p className="text-sm text-slate-400">No events added yet for this sport.</p>
+            )}
+          </div>
         </div>
       ))}
 
@@ -161,12 +160,12 @@ export default function Phase2Panel({
       {completed && <p className="text-sm text-emerald-700">Phase 2 has been submitted.</p>}
 
       {generated && (
-        <div className="mt-4 rounded-md border border-slate-200 bg-white p-3 text-sm">
+        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3 text-sm">
           <p className="mb-2 font-medium text-slate-700">Generated documents:</p>
           <ul className="flex flex-col gap-1">
             {generated.map((d) => (
               <li key={d.referenceCode}>
-                <a href={d.downloadUrl} target="_blank" className="text-slate-700 underline">
+                <a href={d.downloadUrl} target="_blank" className="text-brand-700 underline">
                   {d.sportName} — Entry by Event ({d.referenceCode})
                 </a>
               </li>
@@ -175,5 +174,37 @@ export default function Phase2Panel({
         </div>
       )}
     </div>
+  );
+}
+
+function QuotaField({
+  label,
+  max,
+  defaultValue,
+  disabled,
+  onCommit,
+}: {
+  label: string;
+  max: number;
+  defaultValue: number;
+  disabled: boolean;
+  onCommit: (value: number) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="flex items-center justify-between text-xs font-medium text-slate-600">
+        {label}
+        <span className="text-slate-400">quota {max}</span>
+      </span>
+      <input
+        type="number"
+        min={0}
+        max={max}
+        disabled={disabled}
+        defaultValue={defaultValue}
+        onBlur={(e) => onCommit(Number(e.target.value))}
+        className="input"
+      />
+    </label>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import EntityLogo from "@/components/EntityLogo";
 
 type Sport = { sport_id: number; sport_name: string; age_cutoff_date: string | null };
 
@@ -14,8 +15,8 @@ type Entry = {
   official_name: string | null;
 };
 
-type Athlete = { id: number; full_name_en: string; dob: string | null };
-type Official = { id: number; full_name_en: string };
+type Athlete = { id: number; full_name_en: string; gender: string; photo_url: string | null };
+type Official = { id: number; full_name_en: string; designation: string | null; photo_url: string | null };
 
 export default function Phase3Panel({
   federationId,
@@ -106,8 +107,10 @@ export default function Phase3Panel({
 
   const currentSport = sports.find((s) => s.sport_id === activeSport);
   const sportEntries = entries.filter((e) => e.sport_id === activeSport);
-  const addedAthleteIds = new Set(sportEntries.filter((e) => e.athlete_id).map((e) => e.athlete_id));
-  const addedOfficialIds = new Set(sportEntries.filter((e) => e.official_id).map((e) => e.official_id));
+  const entryFor = (participantType: "athlete" | "official", id: number) =>
+    sportEntries.find((e) =>
+      participantType === "athlete" ? e.athlete_id === id : e.official_id === id
+    );
 
   return (
     <div>
@@ -115,13 +118,13 @@ export default function Phase3Panel({
         <p className="text-sm text-slate-400">No sports set up for your federation in this game yet.</p>
       )}
 
-      {sports.length > 0 && (
+      {sports.length > 1 && (
         <div className="mb-4 flex gap-2">
           {sports.map((s) => (
             <button
               key={s.sport_id}
               onClick={() => setActiveSport(s.sport_id)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 activeSport === s.sport_id ? "bg-brand-600 text-white" : "border border-slate-300 bg-white text-slate-700"
               }`}
             >
@@ -139,82 +142,142 @@ export default function Phase3Panel({
 
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      {!completed && activeSport && (
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-3">
-            <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Add athlete</p>
-            <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
-              {athletes.filter((a) => !addedAthleteIds.has(a.id)).map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => addEntry("athlete", a.id)}
-                  className="rounded px-2 py-1 text-left text-sm hover:bg-slate-50"
-                >
-                  {a.full_name_en}
-                </button>
-              ))}
-              {athletes.length === 0 && <p className="text-xs text-slate-400">No athletes in roster yet.</p>}
-            </div>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-3">
-            <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Add official</p>
-            <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
-              {officials.filter((o) => !addedOfficialIds.has(o.id)).map((o) => (
-                <button
-                  key={o.id}
-                  onClick={() => addEntry("official", o.id)}
-                  className="rounded px-2 py-1 text-left text-sm hover:bg-slate-50"
-                >
-                  {o.full_name_en}
-                </button>
-              ))}
-              {officials.length === 0 && <p className="text-xs text-slate-400">No officials in roster yet.</p>}
-            </div>
-          </div>
-        </div>
-      )}
+      <PersonSection
+        icon="👥"
+        title="Athletes"
+        description="Tick athletes to add them to the long list"
+        selected={athletes.filter((a) => entryFor("athlete", a.id)).length}
+        total={athletes.length}
+      >
+        {athletes.map((a) => {
+          const entry = entryFor("athlete", a.id);
+          return (
+            <RosterCard
+              key={a.id}
+              name={a.full_name_en}
+              photo={a.photo_url}
+              subtitle={a.gender}
+              checked={Boolean(entry)}
+              disabled={completed}
+              onToggle={() => (entry ? removeEntry(entry.entry_id) : addEntry("athlete", a.id))}
+            />
+          );
+        })}
+        {athletes.length === 0 && <p className="text-sm text-slate-400">No athletes in roster yet.</p>}
+      </PersonSection>
 
-      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3">
-        <p className="mb-2 text-xs font-semibold uppercase text-slate-500">
-          {currentSport?.sport_name} long list ({sportEntries.length})
-        </p>
-        <ul className="flex flex-col gap-1">
-          {sportEntries.map((e) => (
-            <li key={e.entry_id} className="flex items-center justify-between text-sm">
-              <span>
-                {e.athlete_name ?? e.official_name}{" "}
-                <span className="text-xs text-slate-400">({e.participant_type})</span>
-              </span>
-              {!completed && (
-                <button onClick={() => removeEntry(e.entry_id)} className="text-xs text-slate-400 hover:text-red-600">
-                  Remove
-                </button>
-              )}
-            </li>
-          ))}
-          {sportEntries.length === 0 && <li className="text-sm text-slate-400">Nobody added yet.</li>}
-        </ul>
+      <div className="my-6 border-t border-slate-100" />
+
+      <PersonSection
+        icon="🎽"
+        title="Team Officials"
+        description="Tick officials to add them to the long list"
+        selected={officials.filter((o) => entryFor("official", o.id)).length}
+        total={officials.length}
+      >
+        {officials.map((o) => {
+          const entry = entryFor("official", o.id);
+          return (
+            <RosterCard
+              key={o.id}
+              name={o.full_name_en}
+              photo={o.photo_url}
+              subtitle={o.designation ?? "Official"}
+              checked={Boolean(entry)}
+              disabled={completed}
+              onToggle={() => (entry ? removeEntry(entry.entry_id) : addEntry("official", o.id))}
+            />
+          );
+        })}
+        {officials.length === 0 && <p className="text-sm text-slate-400">No officials in roster yet.</p>}
+      </PersonSection>
+
+      <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+        {completed ? (
+          <p className="text-sm text-emerald-700">Phase 3 has been submitted.</p>
+        ) : (
+          <button
+            onClick={submit}
+            disabled={submitting || entries.length === 0}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          >
+            {submitting ? "Generating document…" : "Submit Phase 3"}
+          </button>
+        )}
       </div>
 
-      {!completed && entries.length > 0 && (
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {submitting ? "Generating document…" : "Submit Phase 3"}
-        </button>
-      )}
-
-      {completed && <p className="text-sm text-emerald-700">Phase 3 has been submitted.</p>}
-
       {generatedUrl && (
-        <p className="mt-3 text-sm">
-          <a href={generatedUrl} target="_blank" className="text-slate-700 underline">
+        <p className="mt-3 text-right text-sm">
+          <a href={generatedUrl} target="_blank" className="text-brand-700 underline">
             Download Delegation Long List
           </a>
         </p>
       )}
     </div>
+  );
+}
+
+function PersonSection({
+  icon,
+  title,
+  description,
+  selected,
+  total,
+  children,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  selected: number;
+  total: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-lg">{icon}</div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{title}</p>
+            <p className="text-xs text-slate-500">{description}</p>
+          </div>
+        </div>
+        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+          {selected} of {total} selected
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </div>
+  );
+}
+
+function RosterCard({
+  name,
+  photo,
+  subtitle,
+  checked,
+  disabled,
+  onToggle,
+}: {
+  name: string;
+  photo: string | null;
+  subtitle: string;
+  checked: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <label
+      className={`flex items-center gap-3 rounded-xl border p-3 ${
+        checked ? "border-brand-200 bg-brand-50/40" : "border-slate-200 bg-white"
+      } ${disabled ? "" : "cursor-pointer"}`}
+    >
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={onToggle} />
+      <EntityLogo src={photo} name={name} size={36} />
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-slate-900">{name}</p>
+        <p className="truncate text-xs capitalize text-slate-500">{subtitle}</p>
+      </div>
+    </label>
   );
 }
