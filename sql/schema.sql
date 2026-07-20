@@ -9,7 +9,19 @@ CREATE TABLE admins (
   email         VARCHAR(150) UNIQUE NOT NULL,
   username      VARCHAR(100) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  role          VARCHAR(20) NOT NULL DEFAULT 'super_admin' CHECK (role IN ('super_admin', 'sub_admin')),
   created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- Sub-admin privileges: only meaningful when admins.role = 'sub_admin' (super_admin bypasses all checks)
+CREATE TABLE admin_permissions (
+  id         SERIAL PRIMARY KEY,
+  admin_id   INT NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
+  resource   VARCHAR(30) NOT NULL CHECK (resource IN ('federations', 'sports_events', 'games', 'roster')),
+  can_view   BOOLEAN DEFAULT false,
+  can_edit   BOOLEAN DEFAULT false,
+  can_delete BOOLEAN DEFAULT false,
+  UNIQUE (admin_id, resource)
 );
 
 CREATE TABLE federations (

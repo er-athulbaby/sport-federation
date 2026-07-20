@@ -6,7 +6,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ gfsId: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "games", action: "edit" });
   if (error) return error;
   const { gfsId } = await params;
   const { entry_policy_note, age_cutoff_date } = await request.json();
@@ -27,7 +27,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ gfsId: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "games", action: "delete" });
   if (error) return error;
   const { gfsId } = await params;
 

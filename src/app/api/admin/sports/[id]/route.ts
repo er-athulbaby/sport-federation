@@ -6,7 +6,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "sports_events", action: "edit" });
   if (error) return error;
   const { id } = await params;
   const { name, icon_url } = await request.json();
@@ -24,7 +24,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "sports_events", action: "delete" });
   if (error) return error;
   const { id } = await params;
 

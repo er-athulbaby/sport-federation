@@ -6,6 +6,8 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // No permission check — also used as a lookup by the Games setup flow (to know
+  // which sports a federation is allowed to bring into a game).
   const { error } = await requireAdmin();
   if (error) return error;
   const { id } = await params;
@@ -25,7 +27,7 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "federations", action: "edit" });
   if (error) return error;
   const { id } = await params;
   const { sport_id } = await request.json();

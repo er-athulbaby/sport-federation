@@ -3,7 +3,7 @@ import { requireAdmin, errorResponse } from "@/lib/api";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "games", action: "view" });
   if (error) return error;
   const gfsId = new URL(request.url).searchParams.get("game_federation_sport_id");
   if (!gfsId) return errorResponse("game_federation_sport_id query param is required");
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "games", action: "edit" });
   if (error) return error;
   const body = await request.json();
   const { game_federation_sport_id, event_id, max_male, max_female } = body;

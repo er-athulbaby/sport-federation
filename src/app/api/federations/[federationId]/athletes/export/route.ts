@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ federationId: string }> }
 ) {
   const { federationId } = await params;
-  const { error } = await requireFederationAccess(federationId);
+  const { error } = await requireFederationAccess(federationId, { action: "view" });
   if (error) return error;
 
   const result = await pool.query(

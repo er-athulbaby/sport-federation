@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { pool } from "@/lib/db";
 
 export type AppRole = "admin" | "federation";
+export type AdminRole = "super_admin" | "sub_admin";
 
 declare module "next-auth" {
   interface Session {
@@ -12,6 +13,7 @@ declare module "next-auth" {
       role: AppRole;
       name: string;
       federationId?: number;
+      adminRole?: AdminRole;
     };
   }
 }
@@ -20,6 +22,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     role: AppRole;
     federationId?: number;
+    adminRole?: AdminRole;
   }
 }
 
@@ -39,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Auto-detect: check admins first, then federations.
         const adminResult = await pool.query(
-          "SELECT id, name, username, password_hash FROM admins WHERE username = $1",
+          "SELECT id, name, username, password_hash, role FROM admins WHERE username = $1",
           [username]
         );
         if (adminResult.rows.length > 0) {
@@ -50,6 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: String(admin.id),
             name: admin.name,
             role: "admin" as AppRole,
+            adminRole: admin.role as AdminRole,
           };
         }
 
@@ -81,6 +85,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if ((user as { federationId?: number }).federationId) {
           token.federationId = (user as { federationId?: number }).federationId;
         }
+        if ((user as { adminRole?: AdminRole }).adminRole) {
+          token.adminRole = (user as { adminRole?: AdminRole }).adminRole;
+        }
       }
       return token;
     },
@@ -89,6 +96,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.role = token.role;
       if (token.federationId) {
         session.user.federationId = token.federationId;
+      }
+      if (token.adminRole) {
+        session.user.adminRole = token.adminRole;
       }
       return session;
     },

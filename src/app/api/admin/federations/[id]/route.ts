@@ -7,7 +7,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "federations", action: "view" });
   if (error) return error;
   const { id } = await params;
 
@@ -24,7 +24,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "federations", action: "edit" });
   if (error) return error;
   const { id } = await params;
   const body = await request.json();
@@ -68,7 +68,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "federations", action: "delete" });
   if (error) return error;
   const { id } = await params;
 

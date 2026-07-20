@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ federationId: string }> }
 ) {
   const { federationId } = await params;
-  const { createdBy, error } = await requireFederationAccess(federationId);
+  const { createdBy, error } = await requireFederationAccess(federationId, { action: "edit" });
   if (error) return error;
 
   const formData = await request.formData();

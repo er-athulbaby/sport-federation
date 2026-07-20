@@ -12,7 +12,7 @@ export async function PATCH(
   { params }: { params: Promise<{ federationId: string; officialId: string }> }
 ) {
   const { federationId, officialId } = await params;
-  const { error } = await requireFederationAccess(federationId);
+  const { error } = await requireFederationAccess(federationId, { action: "edit" });
   if (error) return error;
 
   const body = await request.json();
@@ -53,7 +53,7 @@ export async function DELETE(
   { params }: { params: Promise<{ federationId: string; officialId: string }> }
 ) {
   const { federationId, officialId } = await params;
-  const { error } = await requireFederationAccess(federationId);
+  const { error } = await requireFederationAccess(federationId, { action: "delete" });
   if (error) return error;
 
   const result = await pool.query(

@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/api";
 import { buildWorkbookBuffer } from "@/lib/excel";
 
 export async function GET() {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "roster", action: "view" });
   if (error) return error;
 
   const result = await pool.query(

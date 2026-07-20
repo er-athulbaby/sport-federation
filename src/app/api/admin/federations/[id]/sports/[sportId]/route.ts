@@ -6,7 +6,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string; sportId: string }> }
 ) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "federations", action: "delete" });
   if (error) return error;
   const { id, sportId } = await params;
 

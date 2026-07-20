@@ -2,6 +2,8 @@ import { pool } from "@/lib/db";
 import { requireAdmin, errorResponse } from "@/lib/api";
 import { NextResponse } from "next/server";
 
+// No permission check — also used as a lookup by the Games setup flow (event
+// names/genders per sport for quota configuration).
 export async function GET() {
   const { error } = await requireAdmin();
   if (error) return error;
@@ -22,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin({ resource: "sports_events", action: "edit" });
   if (error) return error;
 
   const { name, icon_url } = await request.json();

@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ federationId: string }> }
 ) {
   const { federationId } = await params;
-  const { error } = await requireFederationAccess(federationId);
+  const { error } = await requireFederationAccess(federationId, { action: "view" });
   if (error) return error;
 
   const result = await pool.query(
@@ -25,7 +25,7 @@ export async function POST(
   { params }: { params: Promise<{ federationId: string }> }
 ) {
   const { federationId } = await params;
-  const { createdBy, error } = await requireFederationAccess(federationId);
+  const { createdBy, error } = await requireFederationAccess(federationId, { action: "edit" });
   if (error) return error;
 
   const body = await request.json();
