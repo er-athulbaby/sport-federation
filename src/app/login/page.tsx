@@ -36,8 +36,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-slate-900">Sign in</h1>
-        <p className="mb-6 text-sm text-slate-500">
+        <div className="mb-4 flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bahrain-noc-logo.png" alt="Bahrain Olympic Committee" className="h-24 w-auto" />
+        </div>
+        <h1 className="mb-1 text-center text-xl font-semibold text-slate-900">Sign in</h1>
+        <p className="mb-6 text-center text-sm text-slate-500">
           Sport Federation &amp; Game Management System
         </p>
 
@@ -52,7 +56,7 @@ export default function LoginPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
             />
           </div>
 
@@ -66,7 +70,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
             />
           </div>
 
@@ -75,7 +79,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="mt-2 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
