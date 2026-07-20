@@ -23,11 +23,13 @@ export default function Phase3Panel({
   gameFederationId,
   completed,
   onSubmitted,
+  onGoToNext,
 }: {
   federationId: number;
   gameFederationId: number;
   completed: boolean;
   onSubmitted: () => void;
+  onGoToNext?: () => void;
 }) {
   const [sports, setSports] = useState<Sport[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -194,7 +196,17 @@ export default function Phase3Panel({
 
       <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
         {completed ? (
-          <p className="text-sm text-emerald-700">Phase 3 has been submitted.</p>
+          <>
+            <p className="mr-auto text-sm text-emerald-700">Phase 3 has been submitted.</p>
+            {onGoToNext && (
+              <button
+                onClick={onGoToNext}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              >
+                Next Phase →
+              </button>
+            )}
+          </>
         ) : (
           <button
             onClick={submit}
@@ -207,11 +219,15 @@ export default function Phase3Panel({
       </div>
 
       {generatedUrl && (
-        <p className="mt-3 text-right text-sm">
-          <a href={generatedUrl} target="_blank" className="text-brand-700 underline">
-            Download Delegation Long List
+        <div className="mt-3 flex justify-end">
+          <a
+            href={generatedUrl}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+          >
+            ⬇ Download Delegation Long List
           </a>
-        </p>
+        </div>
       )}
     </div>
   );

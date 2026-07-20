@@ -71,6 +71,12 @@ export default function FederationGameDetailPage({
     return !prev.enabled || Boolean(prev.done);
   }
 
+  function nextEnabledPhase(after: PhaseKey): PhaseKey | null {
+    const idx = enabledPhases.findIndex((p) => p.key === after);
+    if (idx === -1 || idx === enabledPhases.length - 1) return null;
+    return enabledPhases[idx + 1].key;
+  }
+
   return (
     <div>
       <Link href="/federation/games" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
@@ -136,6 +142,10 @@ export default function FederationGameDetailPage({
           gameFederationId={gf.game_federation_id}
           completed={Boolean(gf.phase1_confirmed_at)}
           onSubmitted={load}
+          onGoToNext={() => {
+            const next = nextEnabledPhase(1);
+            if (next) setActivePhase(next);
+          }}
         />
       )}
       {activePhase === 2 && gf.phase2_enabled && isUnlocked(2) && federationId && (
@@ -144,6 +154,10 @@ export default function FederationGameDetailPage({
           gameFederationId={gf.game_federation_id}
           completed={Boolean(gf.phase2_completed_at)}
           onSubmitted={load}
+          onGoToNext={() => {
+            const next = nextEnabledPhase(2);
+            if (next) setActivePhase(next);
+          }}
         />
       )}
       {activePhase === 3 && gf.phase3_enabled && isUnlocked(3) && federationId && (
@@ -152,6 +166,10 @@ export default function FederationGameDetailPage({
           gameFederationId={gf.game_federation_id}
           completed={Boolean(gf.phase3_completed_at)}
           onSubmitted={load}
+          onGoToNext={() => {
+            const next = nextEnabledPhase(3);
+            if (next) setActivePhase(next);
+          }}
         />
       )}
       {activePhase === 4 && gf.phase4_enabled && isUnlocked(4) && federationId && (

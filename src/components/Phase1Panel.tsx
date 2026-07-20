@@ -15,11 +15,13 @@ export default function Phase1Panel({
   gameFederationId,
   completed,
   onSubmitted,
+  onGoToNext,
 }: {
   federationId: number;
   gameFederationId: number;
   completed: boolean;
   onSubmitted: () => void;
+  onGoToNext?: () => void;
 }) {
   const [sports, setSports] = useState<SportRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +133,17 @@ export default function Phase1Panel({
 
       <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-5 py-4">
         {completed ? (
-          <p className="text-sm text-emerald-700">Phase 1 has been submitted.</p>
+          <>
+            <p className="mr-auto text-sm text-emerald-700">Phase 1 has been submitted.</p>
+            {onGoToNext && (
+              <button
+                onClick={onGoToNext}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              >
+                Next Phase →
+              </button>
+            )}
+          </>
         ) : (
           <button
             onClick={submit}

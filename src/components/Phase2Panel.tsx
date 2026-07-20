@@ -27,11 +27,13 @@ export default function Phase2Panel({
   gameFederationId,
   completed,
   onSubmitted,
+  onGoToNext,
 }: {
   federationId: number;
   gameFederationId: number;
   completed: boolean;
   onSubmitted: () => void;
+  onGoToNext?: () => void;
 }) {
   const [sports, setSports] = useState<SportGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,30 +149,46 @@ export default function Phase2Panel({
 
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      {!completed && sports.length > 0 && (
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {submitting ? "Generating documents…" : "Submit Phase 2"}
-        </button>
-      )}
-
-      {completed && <p className="text-sm text-emerald-700">Phase 2 has been submitted.</p>}
+      <div className="flex items-center justify-end gap-3">
+        {!completed && sports.length > 0 && (
+          <button
+            onClick={submit}
+            disabled={submitting}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          >
+            {submitting ? "Generating documents…" : "Submit Phase 2"}
+          </button>
+        )}
+        {completed && (
+          <>
+            <p className="mr-auto text-sm text-emerald-700">Phase 2 has been submitted.</p>
+            {onGoToNext && (
+              <button
+                onClick={onGoToNext}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              >
+                Next Phase →
+              </button>
+            )}
+          </>
+        )}
+      </div>
 
       {generated && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3 text-sm">
-          <p className="mb-2 font-medium text-slate-700">Generated documents:</p>
-          <ul className="flex flex-col gap-1">
+        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+          <p className="mb-2 text-sm font-medium text-slate-700">Generated documents</p>
+          <div className="flex flex-wrap gap-2">
             {generated.map((d) => (
-              <li key={d.referenceCode}>
-                <a href={d.downloadUrl} target="_blank" className="text-brand-700 underline">
-                  {d.sportName} — Entry by Event ({d.referenceCode})
-                </a>
-              </li>
+              <a
+                key={d.referenceCode}
+                href={d.downloadUrl}
+                target="_blank"
+                className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+              >
+                ⬇ {d.sportName} — Entry by Event
+              </a>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

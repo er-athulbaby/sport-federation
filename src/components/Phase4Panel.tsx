@@ -203,11 +203,15 @@ export default function Phase4Panel({
       </div>
 
       {generatedUrl && (
-        <p className="mt-3 text-right text-sm">
-          <a href={generatedUrl} target="_blank" className="text-brand-700 underline">
-            Download Delegation Short List
+        <div className="mt-3 flex justify-end">
+          <a
+            href={generatedUrl}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+          >
+            ⬇ Download Delegation Short List
           </a>
-        </p>
+        </div>
       )}
     </div>
   );
