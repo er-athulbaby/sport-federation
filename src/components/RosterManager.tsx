@@ -43,8 +43,14 @@ const emptyOfficial = {
   passport_number: "", passport_expiry_date: "", photo_url: "", tshirt_size: "", suit_size: "",
 };
 
-export default function RosterManager({ federationId }: { federationId: number }) {
-  const [tab, setTab] = useState<"athletes" | "officials">("athletes");
+export default function RosterManager({
+  federationId,
+  fixedTab,
+}: {
+  federationId: number;
+  fixedTab?: "athletes" | "officials";
+}) {
+  const [tab, setTab] = useState<"athletes" | "officials">(fixedTab ?? "athletes");
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [officials, setOfficials] = useState<Official[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,12 +145,16 @@ export default function RosterManager({ federationId }: { federationId: number }
     <div>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-2">
-          <TabButton active={tab === "athletes"} onClick={() => { setTab("athletes"); setShowForm(false); }}>
-            Athletes ({athletes.length})
-          </TabButton>
-          <TabButton active={tab === "officials"} onClick={() => { setTab("officials"); setShowForm(false); }}>
-            Officials ({officials.length})
-          </TabButton>
+          {!fixedTab && (
+            <>
+              <TabButton active={tab === "athletes"} onClick={() => { setTab("athletes"); setShowForm(false); }}>
+                Athletes ({athletes.length})
+              </TabButton>
+              <TabButton active={tab === "officials"} onClick={() => { setTab("officials"); setShowForm(false); }}>
+                Officials ({officials.length})
+              </TabButton>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <a

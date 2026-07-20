@@ -8,6 +8,8 @@ const ALL_NAV: (NavItem & { resource?: string })[] = [
   { href: "/admin/federations", label: "Federations", icon: "🏛️", resource: "federations" },
   { href: "/admin/sports", label: "Sports & Events", icon: "🏅", resource: "sports_events" },
   { href: "/admin/games", label: "Games", icon: "🎮", resource: "games" },
+  { href: "/admin/athletes", label: "Athletes", icon: "🏃", resource: "roster" },
+  { href: "/admin/officials", label: "Team Officials", icon: "🧑‍🏫", resource: "roster" },
   { href: "/admin/sub-admins", label: "Sub-Admins", icon: "🔑" },
 ];
 

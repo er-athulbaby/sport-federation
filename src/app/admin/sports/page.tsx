@@ -4,9 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 
 type Event = { id: number; sport_id: number; name: string; gender: string };
 type Sport = { id: number; name: string; icon_url: string | null; events: Event[] };
+type FederationOption = { id: number; name: string };
+type AssignedFederation = { federation_sport_id: number; federation_id: number; name: string };
 
 export default function SportsPage() {
   const [sports, setSports] = useState<Sport[]>([]);
+  const [allFederations, setAllFederations] = useState<FederationOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [newSportName, setNewSportName] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -14,8 +17,12 @@ export default function SportsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/sports");
-    if (res.ok) setSports(await res.json());
+    const [sportsRes, fedsRes] = await Promise.all([
+      fetch("/api/admin/sports"),
+      fetch("/api/admin/federations"),
+    ]);
+    if (sportsRes.ok) setSports(await sportsRes.json());
+    if (fedsRes.ok) setAllFederations(await fedsRes.json());
     setLoading(false);
   }, []);
 
@@ -77,7 +84,7 @@ export default function SportsPage() {
 
       <div className="flex flex-col gap-3">
         {sports.map((sport) => (
-          <div key={sport.id} className="rounded-lg border border-slate-200 bg-white">
+          <div key={sport.id} className="rounded-xl border border-slate-200 bg-white">
             <div className="flex items-center justify-between px-4 py-3">
               <button
                 onClick={() => setExpanded(expanded === sport.id ? null : sport.id)}
@@ -95,6 +102,7 @@ export default function SportsPage() {
 
             {expanded === sport.id && (
               <div className="border-t border-slate-100 px-4 py-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Events</p>
                 <ul className="mb-3 flex flex-col gap-1">
                   {sport.events.map((ev) => (
                     <li key={ev.id} className="flex items-center justify-between text-sm">
@@ -114,7 +122,7 @@ export default function SportsPage() {
                     <li className="text-sm text-slate-400">No events yet.</li>
                   )}
                 </ul>
-                <form onSubmit={(e) => addEvent(sport.id, e)} className="flex gap-2">
+                <form onSubmit={(e) => addEvent(sport.id, e)} className="mb-4 flex gap-2">
                   <input
                     value={eventForm.name}
                     onChange={(e) => setEventForm({ ...eventForm, name: e.target.value })}
@@ -134,11 +142,100 @@ export default function SportsPage() {
                     Add event
                   </button>
                 </form>
+
+                <FederationsForSport sportId={sport.id} allFederations={allFederations} />
               </div>
             )}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function FederationsForSport({
+  sportId,
+  allFederations,
+}: {
+  sportId: number;
+  allFederations: FederationOption[];
+}) {
+  const [assigned, setAssigned] = useState<AssignedFederation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addFederationId, setAddFederationId] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/admin/sports/${sportId}/federations`);
+    if (res.ok) setAssigned(await res.json());
+    setLoading(false);
+  }, [sportId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function addFederation(e: React.FormEvent) {
+    e.preventDefault();
+    if (!addFederationId) return;
+    await fetch(`/api/admin/sports/${sportId}/federations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ federation_id: Number(addFederationId) }),
+    });
+    setAddFederationId("");
+    load();
+  }
+
+  async function removeFederation(federationId: number) {
+    await fetch(`/api/admin/federations/${federationId}/sports/${sportId}`, { method: "DELETE" });
+    load();
+  }
+
+  const availableFederations = allFederations.filter(
+    (f) => !assigned.some((a) => a.federation_id === f.id)
+  );
+
+  return (
+    <div className="border-t border-slate-100 pt-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Federations using this sport
+      </p>
+      {loading ? (
+        <p className="text-sm text-slate-400">Loading…</p>
+      ) : (
+        <ul className="mb-3 flex flex-col gap-1">
+          {assigned.map((a) => (
+            <li key={a.federation_sport_id} className="flex items-center justify-between text-sm">
+              {a.name}
+              <button
+                onClick={() => removeFederation(a.federation_id)}
+                className="text-xs text-slate-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+          {assigned.length === 0 && (
+            <li className="text-sm text-slate-400">No federations assigned to this sport yet.</li>
+          )}
+        </ul>
+      )}
+      <form onSubmit={addFederation} className="flex gap-2">
+        <select
+          value={addFederationId}
+          onChange={(e) => setAddFederationId(e.target.value)}
+          className="input max-w-xs"
+        >
+          <option value="">Assign a federation…</option>
+          {availableFederations.map((f) => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
+        </select>
+        <button className="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">
+          Assign
+        </button>
+      </form>
     </div>
   );
 }
