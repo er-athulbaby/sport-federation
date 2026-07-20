@@ -14,6 +14,10 @@ export default function SportsPage() {
   const [newSportName, setNewSportName] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
   const [eventForm, setEventForm] = useState({ name: "", gender: "male" });
+  const [editingSportId, setEditingSportId] = useState<number | null>(null);
+  const [editSportName, setEditSportName] = useState("");
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+  const [editEventForm, setEditEventForm] = useState({ name: "", gender: "male" });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -44,6 +48,38 @@ export default function SportsPage() {
 
   async function deleteSport(id: number) {
     await fetch(`/api/admin/sports/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  function startEditSport(sport: Sport) {
+    setEditingSportId(sport.id);
+    setEditSportName(sport.name);
+  }
+
+  async function saveSportName(id: number) {
+    if (!editSportName.trim()) return;
+    await fetch(`/api/admin/sports/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editSportName }),
+    });
+    setEditingSportId(null);
+    load();
+  }
+
+  function startEditEvent(ev: Event) {
+    setEditingEventId(ev.id);
+    setEditEventForm({ name: ev.name, gender: ev.gender });
+  }
+
+  async function saveEvent(id: number) {
+    if (!editEventForm.name.trim()) return;
+    await fetch(`/api/admin/events/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editEventForm),
+    });
+    setEditingEventId(null);
     load();
   }
 
@@ -86,18 +122,45 @@ export default function SportsPage() {
         {sports.map((sport) => (
           <div key={sport.id} className="rounded-xl border border-slate-200 bg-white">
             <div className="flex items-center justify-between px-4 py-3">
-              <button
-                onClick={() => setExpanded(expanded === sport.id ? null : sport.id)}
-                className="text-sm font-medium text-slate-900"
-              >
-                {sport.name} <span className="text-slate-400">({sport.events.length} events)</span>
-              </button>
-              <button
-                onClick={() => deleteSport(sport.id)}
-                className="text-xs text-slate-400 hover:text-red-600"
-              >
-                Delete sport
-              </button>
+              {editingSportId === sport.id ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    value={editSportName}
+                    onChange={(e) => setEditSportName(e.target.value)}
+                    className="input max-w-[220px]"
+                    autoFocus
+                  />
+                  <button onClick={() => saveSportName(sport.id)} className="text-xs font-medium text-brand-700 hover:underline">
+                    Save
+                  </button>
+                  <button onClick={() => setEditingSportId(null)} className="text-xs text-slate-400 hover:underline">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setExpanded(expanded === sport.id ? null : sport.id)}
+                  className="text-sm font-medium text-slate-900"
+                >
+                  {sport.name} <span className="text-slate-400">({sport.events.length} events)</span>
+                </button>
+              )}
+              <div className="flex items-center gap-3">
+                {editingSportId !== sport.id && (
+                  <button
+                    onClick={() => startEditSport(sport)}
+                    className="text-xs text-slate-400 hover:text-slate-700"
+                  >
+                    Edit
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteSport(sport.id)}
+                  className="text-xs text-slate-400 hover:text-red-600"
+                >
+                  Delete sport
+                </button>
+              </div>
             </div>
 
             {expanded === sport.id && (
@@ -106,16 +169,52 @@ export default function SportsPage() {
                 <ul className="mb-3 flex flex-col gap-1">
                   {sport.events.map((ev) => (
                     <li key={ev.id} className="flex items-center justify-between text-sm">
-                      <span>
-                        {ev.name}{" "}
-                        <span className="text-xs text-slate-400">({ev.gender})</span>
-                      </span>
-                      <button
-                        onClick={() => deleteEvent(ev.id)}
-                        className="text-xs text-slate-400 hover:text-red-600"
-                      >
-                        Remove
-                      </button>
+                      {editingEventId === ev.id ? (
+                        <div className="flex flex-1 items-center gap-2">
+                          <input
+                            value={editEventForm.name}
+                            onChange={(e) => setEditEventForm({ ...editEventForm, name: e.target.value })}
+                            className="input max-w-[200px]"
+                            autoFocus
+                          />
+                          <select
+                            value={editEventForm.gender}
+                            onChange={(e) => setEditEventForm({ ...editEventForm, gender: e.target.value })}
+                            className="input max-w-[110px]"
+                          >
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="mixed">Mixed</option>
+                          </select>
+                          <button onClick={() => saveEvent(ev.id)} className="text-xs font-medium text-brand-700 hover:underline">
+                            Save
+                          </button>
+                          <button onClick={() => setEditingEventId(null)} className="text-xs text-slate-400 hover:underline">
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span>
+                            {ev.name}{" "}
+                            <span className="text-xs text-slate-400">({ev.gender})</span>
+                          </span>
+                          <span className="flex items-center gap-3">
+                            <button
+                              onClick={() => startEditEvent(ev)}
+                              className="text-xs text-slate-400 hover:text-slate-700"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteEvent(ev.id)}
+                              className="text-xs text-slate-400 hover:text-red-600"
+                            >
+                              Remove
+                            </button>
+                          </span>
+                        </>
+                      )}
                     </li>
                   ))}
                   {sport.events.length === 0 && (
@@ -162,7 +261,6 @@ function FederationsForSport({
 }) {
   const [assigned, setAssigned] = useState<AssignedFederation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addFederationId, setAddFederationId] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,26 +273,20 @@ function FederationsForSport({
     load();
   }, [load]);
 
-  async function addFederation(e: React.FormEvent) {
-    e.preventDefault();
-    if (!addFederationId) return;
-    await fetch(`/api/admin/sports/${sportId}/federations`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ federation_id: Number(addFederationId) }),
-    });
-    setAddFederationId("");
+  async function toggleFederation(federationId: number, isAssigned: boolean) {
+    if (isAssigned) {
+      await fetch(`/api/admin/federations/${federationId}/sports/${sportId}`, { method: "DELETE" });
+    } else {
+      await fetch(`/api/admin/sports/${sportId}/federations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ federation_id: federationId }),
+      });
+    }
     load();
   }
 
-  async function removeFederation(federationId: number) {
-    await fetch(`/api/admin/federations/${federationId}/sports/${sportId}`, { method: "DELETE" });
-    load();
-  }
-
-  const availableFederations = allFederations.filter(
-    (f) => !assigned.some((a) => a.federation_id === f.id)
-  );
+  const assignedIds = new Set(assigned.map((a) => a.federation_id));
 
   return (
     <div className="border-t border-slate-100 pt-3">
@@ -204,38 +296,22 @@ function FederationsForSport({
       {loading ? (
         <p className="text-sm text-slate-400">Loading…</p>
       ) : (
-        <ul className="mb-3 flex flex-col gap-1">
-          {assigned.map((a) => (
-            <li key={a.federation_sport_id} className="flex items-center justify-between text-sm">
-              {a.name}
-              <button
-                onClick={() => removeFederation(a.federation_id)}
-                className="text-xs text-slate-400 hover:text-red-600"
-              >
-                Remove
-              </button>
-            </li>
+        <div className="flex flex-col gap-1">
+          {allFederations.map((f) => (
+            <label key={f.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={assignedIds.has(f.id)}
+                onChange={() => toggleFederation(f.id, assignedIds.has(f.id))}
+              />
+              {f.name}
+            </label>
           ))}
-          {assigned.length === 0 && (
-            <li className="text-sm text-slate-400">No federations assigned to this sport yet.</li>
+          {allFederations.length === 0 && (
+            <p className="text-sm text-slate-400">No federations yet — add some under Federations.</p>
           )}
-        </ul>
+        </div>
       )}
-      <form onSubmit={addFederation} className="flex gap-2">
-        <select
-          value={addFederationId}
-          onChange={(e) => setAddFederationId(e.target.value)}
-          className="input max-w-xs"
-        >
-          <option value="">Assign a federation…</option>
-          {availableFederations.map((f) => (
-            <option key={f.id} value={f.id}>{f.name}</option>
-          ))}
-        </select>
-        <button className="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">
-          Assign
-        </button>
-      </form>
     </div>
   );
 }
