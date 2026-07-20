@@ -3,6 +3,11 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { pool } from "@/lib/db";
 
+function formatDate(value: unknown): string {
+  if (!value) return "?";
+  return new Date(value as string | Date).toLocaleDateString();
+}
+
 export default async function FederationGamesPage() {
   const session = await auth();
   if (!session?.user.federationId) redirect("/login");
@@ -30,7 +35,7 @@ export default async function FederationGamesPage() {
             <div>
               <p className="text-sm font-medium text-slate-900">{game.name}</p>
               <p className="text-xs text-slate-500">
-                {game.start_date ?? "?"} &ndash; {game.end_date ?? "?"}
+                {formatDate(game.start_date)} &ndash; {formatDate(game.end_date)}
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
