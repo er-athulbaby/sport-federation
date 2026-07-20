@@ -152,7 +152,7 @@ export default function Phase2Panel({
         <button
           onClick={submit}
           disabled={submitting}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {submitting ? "Generating documents…" : "Submit Phase 2"}
         </button>

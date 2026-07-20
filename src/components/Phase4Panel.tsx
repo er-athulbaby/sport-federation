@@ -124,7 +124,7 @@ export default function Phase4Panel({
               onClick={() => setActiveSport(s.game_federation_sport_id)}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 activeSport === s.game_federation_sport_id
-                  ? "bg-blue-600 text-white"
+                  ? "bg-brand-600 text-white"
                   : "border border-slate-300 bg-white text-slate-700"
               }`}
             >
@@ -195,7 +195,7 @@ export default function Phase4Panel({
           <button
             onClick={submit}
             disabled={submitting || shortList.length === 0}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {submitting ? "Finalizing…" : "Submit Phase 4"}
           </button>
@@ -204,7 +204,7 @@ export default function Phase4Panel({
 
       {generatedUrl && (
         <p className="mt-3 text-right text-sm">
-          <a href={generatedUrl} target="_blank" className="text-blue-700 underline">
+          <a href={generatedUrl} target="_blank" className="text-brand-700 underline">
             Download Delegation Short List
           </a>
         </p>
@@ -232,7 +232,7 @@ function PersonSection({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-lg">{icon}</div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-lg">{icon}</div>
           <div>
             <p className="text-sm font-semibold text-slate-900">{title}</p>
             <p className="text-xs text-slate-500">{description}</p>
@@ -272,7 +272,7 @@ function PersonCard({
   const isConfirmed = assignments.length > 0;
 
   return (
-    <div className={`rounded-xl border p-3 ${isConfirmed ? "border-blue-200 bg-blue-50/40" : "border-slate-200 bg-white"}`}>
+    <div className={`rounded-xl border p-3 ${isConfirmed ? "border-brand-200 bg-brand-50/40" : "border-slate-200 bg-white"}`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <input
@@ -304,10 +304,10 @@ function PersonCard({
           {assignments.map((a) => {
             const ev = events.find((e) => e.game_event_id === a.game_event_id);
             return (
-              <span key={a.short_entry_id} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+              <span key={a.short_entry_id} className="rounded-full bg-brand-100 px-2 py-0.5 text-xs text-brand-700">
                 {ev?.name ?? "Event"}
                 {!completed && (
-                  <button onClick={() => onUnassign(a.short_entry_id)} className="ml-1 text-blue-400 hover:text-red-600">
+                  <button onClick={() => onUnassign(a.short_entry_id)} className="ml-1 text-brand-400 hover:text-red-600">
                     ×
                   </button>
                 )}
@@ -331,7 +331,7 @@ function PersonCard({
             <button
               disabled={!pendingEvent}
               onClick={() => pendingEvent && onAssign(pendingEvent)}
-              className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+              className="rounded-md bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-40"
             >
               Add
             </button>

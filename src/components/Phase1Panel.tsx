@@ -136,7 +136,7 @@ export default function Phase1Panel({
           <button
             onClick={submit}
             disabled={submitting || sports.length === 0}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {submitting ? "Submitting…" : "Submit Phase 1"}
           </button>

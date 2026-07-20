@@ -114,7 +114,7 @@ export default function FederationGameDetailPage({
               onClick={() => setActivePhase(p.key)}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 activePhase === p.key
-                  ? "bg-blue-600 text-white"
+                  ? "bg-brand-600 text-white"
                   : unlocked
                   ? "border border-slate-300 bg-white text-slate-700"
                   : "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"

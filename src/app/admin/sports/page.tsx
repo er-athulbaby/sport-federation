@@ -68,7 +68,7 @@ export default function SportsPage() {
           placeholder="New sport name (e.g. Athletics)"
           className="input max-w-xs"
         />
-        <button className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+        <button className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
           Add sport
         </button>
       </form>
@@ -130,7 +130,7 @@ export default function SportsPage() {
                     <option value="female">Female</option>
                     <option value="mixed">Mixed</option>
                   </select>
-                  <button className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+                  <button className="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">
                     Add event
                   </button>
                 </form>

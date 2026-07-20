@@ -120,7 +120,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
             <option key={f.id} value={f.id}>{f.name}</option>
           ))}
         </select>
-        <button className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+        <button className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
           Add
         </button>
       </form>
@@ -207,7 +207,7 @@ function FederationBlock({ gf, onRemove }: { gf: GameFederation; onRemove: () =>
                 <option key={s.sport_id} value={s.sport_id}>{s.name}</option>
               ))}
             </select>
-            <button className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+            <button className="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">
               Add
             </button>
           </form>
@@ -347,7 +347,7 @@ function SportBlock({
                 <option key={ev.id} value={ev.id}>{ev.name} ({ev.gender})</option>
               ))}
             </select>
-            <button className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+            <button className="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">
               Add
             </button>
           </form>

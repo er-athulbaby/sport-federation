@@ -10,6 +10,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand color, derived from #E81E2C */
+  --color-brand-50: #fef4f4;
+  --color-brand-100: #fde9ea;
+  --color-brand-200: #f9c7ca;
+  --color-brand-300: #f59aa0;
+  --color-brand-400: #ef626b;
+  --color-brand-500: #eb404c;
+  --color-brand-600: #e81e2c;
+  --color-brand-700: #c51a25;
+  --color-brand-800: #a2151f;
+  --color-brand-900: #801118;
 }
 
 body {

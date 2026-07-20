@@ -29,7 +29,7 @@ export default function EntityLogo({
   return (
     <div
       style={{ width: size, height: size }}
-      className="flex flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white"
+      className="flex flex-shrink-0 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white"
     >
       {name.slice(0, 2).toUpperCase()}
     </div>

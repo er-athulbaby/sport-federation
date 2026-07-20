@@ -159,7 +159,7 @@ export default function RosterManager({ federationId }: { federationId: number }
           </label>
           <button
             onClick={() => setShowForm((s) => !s)}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
             {showForm ? "Cancel" : tab === "athletes" ? "Add athlete" : "Add official"}
           </button>
@@ -220,7 +220,7 @@ export default function RosterManager({ federationId }: { federationId: number }
             </Field>
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" className="mt-2 w-fit rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          <button type="submit" className="mt-2 w-fit rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
             Save athlete
           </button>
         </form>
@@ -264,7 +264,7 @@ export default function RosterManager({ federationId }: { federationId: number }
             </Field>
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" className="mt-2 w-fit rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          <button type="submit" className="mt-2 w-fit rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
             Save official
           </button>
         </form>
@@ -314,7 +314,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-        active ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200"
+        active ? "bg-brand-600 text-white" : "bg-white text-slate-600 border border-slate-200"
       }`}
     >
       {children}

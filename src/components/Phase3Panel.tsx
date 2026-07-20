@@ -122,7 +122,7 @@ export default function Phase3Panel({
               key={s.sport_id}
               onClick={() => setActiveSport(s.sport_id)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                activeSport === s.sport_id ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700"
+                activeSport === s.sport_id ? "bg-brand-600 text-white" : "border border-slate-300 bg-white text-slate-700"
               }`}
             >
               {s.sport_name}
@@ -200,7 +200,7 @@ export default function Phase3Panel({
         <button
           onClick={submit}
           disabled={submitting}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {submitting ? "Generating document…" : "Submit Phase 3"}
         </button>
